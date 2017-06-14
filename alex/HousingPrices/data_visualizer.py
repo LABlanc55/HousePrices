@@ -16,15 +16,15 @@ class DataVisualizer:
         quantity.remove('SalePrice')
         quantity.remove('Id')
 
-        #self.display_features_missing_values(train)
-        #self.find_training_results_shape(train)
-        #print(self.test_normality(train, quantity))
-        #self.find_best_features_for_transformation(train, quantity)
+        # self.display_features_missing_values(train)
+        # self.find_training_results_shape(train)
+        # print(self.test_normality(train, quantity))
+        # self.find_best_features_for_transformation(train, quantity)
 
         quality = [f for f in train.columns if train.dtypes[f] == 'object']
 
-        #self.display_var_boxplots(train, quality)
-        self.display_est_influence_categorical(train, quality)
+        # self.display_var_boxplots(train, quality)
+        # self.display_est_influence_categorical(train, quality)
 
 
     def display_est_influence_categorical(self, train, quality):
