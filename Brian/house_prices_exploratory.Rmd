@@ -1,0 +1,108 @@
+---
+title: "Kaggle - House Prices"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+Predict sales prices and practice feature engineering, RFs, and gradient boosting
+
+```{r}
+library(ggplot2)
+
+PROJ_PATH <- '~/Documents/kaggle/house_prices'
+
+train <- read.csv(file.path(PROJ_PATH, 'data/train.csv'))
+test <- read.csv(file.path(PROJ_PATH, 'data/test.csv'))
+
+nm <- names(train)
+
+# Numeric variable indices
+num_idx <- c(4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,
+              52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78)
+
+# Categorical variable indices
+cat_idx <- setdiff(2:(ncol(train)-1), num_idx)
+
+hist2 <- function(..., breaks=30, col='darkgray', xlab=NULL){
+  hist(..., breaks=breaks, col=col, border=col, xlab=xlab)
+}
+
+barplot2 <- function(..., col='darkgray', xlab=NULL){
+  barplot(..., col=col, border=col, horiz=TRUE)
+}
+
+plot2 <- function(..., col=adjustcolor('gray30', alpha.f=0.2), bty='n'){
+  plot(..., col=col, bty=bty)
+}
+```
+
+Data description
+```{r}
+dim(train)
+```
+
+```{r}
+names(train)
+```
+
+ Histograms of numeric variables
+```{r, fig.width=9, fig.height=1.8}
+par(mar=c(3,3,3,3))
+par(mfrow = c(1, 4))
+
+for (ni in num_idx){
+  hist2(train[[ni]], main=nm[ni])
+}
+
+```
+```{r}
+hist2(train[['SalePrice']], main='SalePrice')
+```
+
+Frequencies of categorical variables
+```{r, fig.width=9, fig.height=2}
+par(las=2)
+par(mar=c(3,4,3,3))
+par(mfrow = c(1, 4))
+
+for (ci in cat_idx){
+  barplot2(table(train[[ci]]), main=nm[ci])
+}
+```
+
+Missingness of variables (only those with any values missing)
+```{r, fig.width=6, fig.height=3}
+missing_perc <- sort(sapply(train, function(x) sum(is.na(x)) / length(x)))
+
+par(las=2)
+par(mar=c(3,7,2,2))
+barplot2(missing_perc[missing_perc>0],
+         cex.names=0.6, cex.axis=0.6, xlim=c(0,1),
+         main='Missingness')
+```
+
+Relation of each variable to price
+```{r, fig.width=9, fig.height=1.8}
+
+par(mar=c(3,3,3,3))
+par(mfrow = c(1, 4))
+
+for (ni in num_idx){
+  plot2(train[,c(nm[ni], 'SalePrice'),],
+       main=nm[ni], ylim=range(train$SalePrice))
+}
+```
+```{r, fig.width=9, fig.height=1.8}
+
+par(mar=c(3,3,3,3))
+par(mfrow = c(1, 4))
+
+for (ni in cat_idx){
+  plot2(train[,c(nm[ni], 'SalePrice'),],
+       main=nm[ni], ylim=range(train$SalePrice))
+}
+```
+
+
+
