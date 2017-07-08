@@ -57,7 +57,7 @@ par(mar=c(3,4,3,3))
 par(mfrow = c(1, 4))
 
 for (ci in cat_idx){
-  barplot2(table(train[[ci]]), main=nm[ci])
+  barplot2(table(train[[ci]], useNA='ifany'), main=nm[ci])
 }
 ```
 
