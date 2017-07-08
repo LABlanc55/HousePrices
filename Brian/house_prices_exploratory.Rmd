@@ -8,22 +8,11 @@ output:
 Predict sales prices and practice feature engineering, RFs, and gradient boosting
 
 ```{r}
-library(ggplot2)
-
 PROJ_PATH <- '~/Documents/kaggle/house_prices'
 
-train <- read.csv(file.path(PROJ_PATH, 'data/train.csv'))
-test <- read.csv(file.path(PROJ_PATH, 'data/test.csv'))
+load(file.path(PROJ_PATH, 'data/house_prices.Rdata'))
 
-nm <- names(train)
-
-# Numeric variable indices
-num_idx <- c(4,5,18,19,20,21,27,35,37,38,39,44,45,46,47,48,49,50,51,
-              52,53,55,57,60,62,63,67,68,69,70,71,72,76,77,78)
-
-# Categorical variable indices
-cat_idx <- setdiff(2:(ncol(train)-1), num_idx)
-
+# Plotting functions
 hist2 <- function(..., breaks=30, col='darkgray', xlab=NULL){
   hist(..., breaks=breaks, col=col, border=col, xlab=xlab)
 }
@@ -99,8 +88,9 @@ par(mar=c(3,3,3,3))
 par(mfrow = c(1, 4))
 
 for (ni in cat_idx){
-  plot2(train[,c(nm[ni], 'SalePrice'),],
-       main=nm[ni], ylim=range(train$SalePrice))
+  plot2(factor(train[[ni]]), train$SalePrice,
+       main=nm[ni], ylim=range(train$SalePrice),
+       frame=FALSE)
 }
 ```
 
