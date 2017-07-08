@@ -8,6 +8,7 @@ output:
 Predict sales prices and practice feature engineering, RFs, and gradient boosting
 
 ```{r}
+rm(list=ls())
 PROJ_PATH <- '~/Documents/kaggle/house_prices'
 
 load(file.path(PROJ_PATH, 'data/house_prices.Rdata'))
@@ -94,5 +95,21 @@ for (ni in cat_idx){
 }
 ```
 
+Top correlated numeric variables (pairwise-complete observations)
+```{r, fig.width=6}
+cor_mat <- cor(train[,num_idx], use='pairwise.complete')
+
+not_na_mat <- !is.na(as.matrix(train[,num_idx]))
+pairwise_completeness <- t(not_na_mat) %*% not_na_mat / nrow(train)
+
+cor_df <- data.frame(x1=rep(colnames(cor_mat), each=ncol(cor_mat)),
+                     x2=rep(colnames(cor_mat), times=ncol(cor_mat)),
+                     cor=as.vector(cor_mat),
+                     perc_complete=as.vector(pairwise_completeness))
+
+cor_df <- cor_df[with(cor_df, X1!=X2),]
+cor_df <- cor_df[order(abs(cor_df$cor), decreasing=TRUE),]
+knitr::kable(cor_df[abs(cor_df$cor) > 0.50,], row.names=FALSE)
+```
 
 
