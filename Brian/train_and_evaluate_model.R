@@ -53,7 +53,7 @@ for (i in 1:K){ #need to do imputation separately on test data
   
   rf[[i]]$rmse <- rmse(log(rf[[i]]$test$predicted),
                        log(sale_price[test_idx]))
-  print(rf[[i]]$rmse)
+  message(rf[[i]]$rmse)
   
   plot_pred(log(sale_price[test_idx]),
             log(rf[[i]]$test$predicted),
