@@ -11,12 +11,17 @@ train['SalePrice'] <- NULL
 # Remove variables
 #--------------------------------------------------------
 
+train$Id <- NULL
+
 # Variables that are over 90% missing
 missing_perc <- sapply(train, function(x) sum(is.na(x)) / length(x))
 train <- train[,missing_perc <= 0.90]
 
-# Low information
+# Low or redundant information
 train$Street <- NULL
+train$Utilities <- NULL
+train$HouseStyle <- NULL
+train$RoofMatl <- NULL
 
 # One each in pairs of highly correlated variables
 train$GarageCars <- NULL
@@ -57,29 +62,107 @@ for (mp in mszoning_map){
 }
 train$MSZoning <- NULL
 
-# Lot Area
+# LotArea
 train$LogLotArea <- log(train$LotArea)
 train$LotArea <- NULL
 
-# Lot Shape
+# LotShape
 train$LotShapeIrregular <- ifelse(train$LotShape=='Reg', 0,
-                                  as.numeric(substr(train$LotShape,3,3)))
+                                  suppressWarnings(as.numeric(substr(train$LotShape,3,3))))
+
 train$LotShape <- NULL
 
+# LandContour
+train$Level <- ifelse(train$LandContour=='Lvl', 1, 0)
+train$LandContour <- NULL
+
+# LotConfig
+train$InsideLot <- ifelse(train$LotConfig=='Inside', 1, 0)
+train$LotConfig <- NULL
+
+# Neighborhood
+# Could try to do some clustering to reduce categories
+
+# Noise
+noise_map <- list(
+  high=c('Artery','RRAn','RRAe'),
+  medium=c('Feedr','RRNn','RRNe'),
+  low=c('Norm','PosN')
+)
+
+train$NoiseLevel <- factor(NA, levels=names(noise_map))
+
+for (lv in names(noise_map)){
+  bool <- train$Condition1 %in% noise_map[[lv]] |
+           train$Condition2 %in% noise_map[[lv]]
+  train$NoiseLevel[bool & is.na(train$NoiseLevel)] <- lv
+}
+
+train$Condition1 <-NULL
+train$Condition2 <- NULL
+
+# BldgType
+train$BldgType[train$BldgType=='2FmCon'] <- 'Duplex'
+
+#YearBuilt & YearRemodAdd
+train$LogBldgAge <- log(2017 - train$YearBuilt)
+train$LogBldgYearsToRemod <- ifelse(train$YearRemodAdd == train$YearBuilt, 0,
+                                 log(train$YearRemodAdd - train$YearBuilt))
+train$YearBuilt <- NULL
+train$YearRemodAdd <- NULL
+
+# RoofStyle
+levels(train$RoofStyle) <- c(levels(train$RoofStyle), 'Other')
+train$RoofStyle[
+  train$RoofStyle %in% c('Shed','Mansard','Gambrel','Flat')] <- 'Other'
+
+# Exterior2nd
+train$Exterior2nd[
+  as.character(train$Exterior2nd) == as.character(train$Exterior1st)] <- NA
+
+# BsmtQual
+train$BsmtQual <- factor(train$BsmtQual, levels=c('Po','Fa','TA','Gd','Ex'))
+train$BsmtQual <- as.numeric(train$BsmtQual)
+
+
+# Revisit basement square footage
 
 # Count a finished basement in square footage
 train$GrLivArea <- with(train, GrLivArea + BsmtFinSF1 + BsmtFinSF2)
 train$BsmtFinSF1 <- NULL
 train$BsmtFinSF2 <- NULL
 
+# Heating
+train$GasHeat <- ifelse(grepl('Gas', train$Heating), 1, 0)
+train$Heating <- NULL
 
+# Electricity
+train$Elctr <- as.character(train$Electrical)
+train$Elctr[train$Electrical %in% c('FuseA','Mix')] <- 'FuseGood'
+train$Elctr[train$Electrical %in% c('FuseF','FuseP')] <- 'FuseGood'
+train$Elctr[is.na(train$Electrical)] <- 'SBrkr'
 
-nm <- names(train)
-cl <- sapply(train, 'class')
+train$Elctr <- factor(train$Elctr)
+train$Electrical <- NULL
+
+# Above ground square feet
+train$Log1stFlrSF <- log(train$X1stFlrSF)
+train$X1stFlrSF <- NULL
+
+# KitchenQual
+# train$KitchenQual <- factor(train$KitchenQual, levels=c('Po','Fa','TA','Gd','Ex'))
+# train$KitchenQual <- as.numeric(train$KitchenQual)
+
+# Functional
+train$Functional <- as.integer(train$Functional == 'Typ')
+
 
 #--------------------------------------------------------
 # Fill in missing data
 #--------------------------------------------------------
+
+nm <- names(train)
+cl <- sapply(train, 'class')
 
 # Replace NA with 'Missing' in remaining categorical variables 
 for (i in 1:ncol(train)){
