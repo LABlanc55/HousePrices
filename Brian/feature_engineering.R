@@ -22,6 +22,12 @@ train$Street <- NULL
 train$Utilities <- NULL
 train$HouseStyle <- NULL
 train$RoofMatl <- NULL
+train$EnclosedPorch <- NULL
+train$X3SsnPorch <- NULL
+train$ScreenPorch <- NULL
+train$PoolArea <- NULL
+train$MiscVal <- NULL
+train$PoolQC <- NULL
 
 # One each in pairs of highly correlated variables
 train$GarageCars <- NULL
@@ -149,13 +155,18 @@ train$Electrical <- NULL
 train$Log1stFlrSF <- log(train$X1stFlrSF)
 train$X1stFlrSF <- NULL
 
-# KitchenQual
-# train$KitchenQual <- factor(train$KitchenQual, levels=c('Po','Fa','TA','Gd','Ex'))
-# train$KitchenQual <- as.numeric(train$KitchenQual)
-
 # Functional
 train$Functional <- as.integer(train$Functional == 'Typ')
 
+# GarageType
+train$GarageType[train$GarageType %in% c('2Types','Basment','BuiltIn')] <- 'Attchd'
+train$GarageType[train$GarageType == 'CarPort'] <- NA
+
+# SaleType
+train$SaleType[!(train$SaleType %in% c('WD','New'))] <- 'Oth'
+
+# SaleCondtion
+train$SaleCondition[train$SaleCondition %in% c('AdjLand','Family','Alloca')] <- 'Abnorml'
 
 #--------------------------------------------------------
 # Fill in missing data
